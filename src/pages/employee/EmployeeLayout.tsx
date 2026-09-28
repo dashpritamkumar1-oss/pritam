@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Home, Clock, CalendarDays, Bell, User, Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { employees, notifications } from '../../data/mockData';
+import { useAppData } from '../../contexts/AppDataContext';
+import { employees } from '../../data/mockData';
 
 export default function EmployeeLayout() {
   const navigate = useNavigate();
@@ -10,8 +11,9 @@ export default function EmployeeLayout() {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
 
+  const { notifications } = useAppData();
   const employee = employees.find(e => e.employeeId === user?.employeeId);
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n: any) => !n.isRead).length;
 
   const navItems = [
     { path: '/employee', icon: Home, label: 'Home' },

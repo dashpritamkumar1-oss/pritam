@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { MapPin, Clock, CheckCircle, AlertCircle, Calendar, TrendingUp, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useAppData } from '../../contexts/AppDataContext';
+import { useToast } from '../../contexts/ToastContext';
 import { employees, shifts, leaveBalances, holidays, todayAttendance } from '../../data/mockData';
 
 export default function EmployeeDashboard() {
   const { user } = useAuth();
+  const { markAttendance } = useAppData();
+  const toast = useToast();
   const employee = employees.find(e => e.employeeId === user?.employeeId);
   const [attendanceMarked, setAttendanceMarked] = useState(() => {
     const att = todayAttendance.find(a => a.employeeId === user?.employeeId);
@@ -20,8 +24,15 @@ export default function EmployeeDashboard() {
 
   const handleMarkAttendance = async () => {
     setIsMarking(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setAttendanceMarked(true);
+    try {
+      if (employee) {
+        await markAttendance(employee.employeeId, employee.shift);
+      }
+      setAttendanceMarked(true);
+      toast.success('Attendance Marked!', `Check-in recorded at ${currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}. Location verified.`);
+    } catch {
+      toast.error('Failed', 'Could not mark attendance. Please try again.');
+    }
     setIsMarking(false);
   };
 

@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Calendar, Plus, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { leaveBalances, leaveRequests } from '../../data/mockData';
+import { useAppData } from '../../contexts/AppDataContext';
+import { useToast } from '../../contexts/ToastContext';
+import { employees, leaveBalances } from '../../data/mockData';
 
 export default function LeavePage() {
   const { user } = useAuth();
+  const { leaveRequests, applyLeave } = useAppData();
+  const toast = useToast();
+  const employee = employees.find(e => e.employeeId === user?.employeeId);
   const [showApply, setShowApply] = useState(false);
   const [leaveType, setLeaveType] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -13,14 +18,41 @@ export default function LeavePage() {
   const [isHalfDay, setIsHalfDay] = useState(false);
   const [tab, setTab] = useState<'balance' | 'history' | 'apply'>('balance');
 
-  const myLeaves = leaveRequests.filter(l => l.employeeId === user?.employeeId || true);
+  const myLeaves = leaveRequests.filter(l => l.employeeId === user?.employeeId || true).slice(0, 7);
 
-  const handleApply = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleApply = async () => {
+    if (!leaveType || !fromDate || !reason || !employee) {
+      toast.error('Missing fields', 'Please fill all required fields');
+      return;
+    }
+    setSubmitting(true);
+    const toDateValue = toDate || fromDate;
+    const from = new Date(fromDate);
+    const to = new Date(toDateValue);
+    const days = Math.max(1, Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    
+    await applyLeave({
+      employeeId: employee.employeeId,
+      employeeName: `${employee.firstName} ${employee.lastName}`,
+      department: employee.department,
+      leaveType,
+      fromDate,
+      toDate: toDateValue,
+      days: isHalfDay ? 0.5 : days,
+      reason,
+      isHalfDay,
+    });
+    
+    setSubmitting(false);
     setShowApply(false);
     setLeaveType('');
     setFromDate('');
     setToDate('');
     setReason('');
+    setTab('history');
+    toast.success('Leave Applied', 'Your leave request has been submitted for approval.');
   };
 
   return (
@@ -181,10 +213,10 @@ export default function LeavePage() {
 
           <button
             onClick={handleApply}
-            disabled={!leaveType || !fromDate || !reason}
+            disabled={!leaveType || !fromDate || !reason || submitting}
             className="w-full py-3.5 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target"
           >
-            Submit Leave Request
+            {submitting ? 'Submitting...' : 'Submit Leave Request'}
           </button>
         </div>
       )}

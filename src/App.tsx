@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ToastProvider } from './contexts/ToastContext';
+import { AppDataProvider } from './contexts/AppDataContext';
 
 // Employee Pages
 import EmployeeLogin from './pages/employee/Login';
@@ -11,6 +13,10 @@ import EmployeeAttendance from './pages/employee/Attendance';
 import EmployeeLeave from './pages/employee/Leave';
 import EmployeeNotifications from './pages/employee/Notifications';
 import EmployeeProfile from './pages/employee/Profile';
+import EmployeeHolidays from './pages/employee/Holidays';
+import EmployeeCorrections from './pages/employee/Corrections';
+import EmployeeWeekOff from './pages/employee/WeekOff';
+import EmployeeDocuments from './pages/employee/Documents';
 
 // Admin Pages
 import AdminLogin from './pages/admin/Login';
@@ -20,6 +26,9 @@ import AdminEmployees from './pages/admin/Employees';
 import AdminAttendance from './pages/admin/Attendance';
 import AdminLeave from './pages/admin/Leave';
 import { ShiftsPage, ReportsPage, ApprovalsPage, AuditLogsPage, SettingsPage } from './pages/admin/OtherPages';
+import AdminManpower from './pages/admin/Manpower';
+import AdminNotifications from './pages/admin/Notifications';
+import AdminPayroll from './pages/admin/Payroll';
 
 // Route Guards
 function EmployeeRoute({ children }: { children: React.ReactNode }) {
@@ -63,10 +72,10 @@ function AppRoutes() {
         <Route path="leave" element={<EmployeeLeave />} />
         <Route path="notifications" element={<EmployeeNotifications />} />
         <Route path="profile" element={<EmployeeProfile />} />
-        <Route path="documents" element={<div className="p-4"><h1 className="text-xl font-bold text-gray-900 dark:text-white">Documents</h1><p className="text-sm text-gray-500 mt-2">View and download your documents.</p></div>} />
-        <Route path="holidays" element={<div className="p-4"><h1 className="text-xl font-bold text-gray-900 dark:text-white">Holiday Calendar</h1><p className="text-sm text-gray-500 mt-2">Upcoming holidays and events.</p></div>} />
-        <Route path="corrections" element={<div className="p-4"><h1 className="text-xl font-bold text-gray-900 dark:text-white">Attendance Corrections</h1><p className="text-sm text-gray-500 mt-2">Request corrections for missed attendance.</p></div>} />
-        <Route path="weekoff" element={<div className="p-4"><h1 className="text-xl font-bold text-gray-900 dark:text-white">Week-Off Schedule</h1><p className="text-sm text-gray-500 mt-2">Your weekly off schedule.</p></div>} />
+        <Route path="documents" element={<EmployeeDocuments />} />
+        <Route path="holidays" element={<EmployeeHolidays />} />
+        <Route path="corrections" element={<EmployeeCorrections />} />
+        <Route path="weekoff" element={<EmployeeWeekOff />} />
       </Route>
 
       {/* Admin Portal */}
@@ -85,11 +94,11 @@ function AppRoutes() {
         <Route path="workforce/assignments" element={<ShiftsPage />} />
         <Route path="workforce/weekoff" element={<ShiftsPage />} />
         <Route path="workforce/holidays" element={<ShiftsPage />} />
-        <Route path="workforce/manpower" element={<AdminDashboard />} />
-        <Route path="payroll" element={<ReportsPage />} />
+        <Route path="workforce/manpower" element={<AdminManpower />} />
+        <Route path="payroll" element={<AdminPayroll />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="approvals" element={<ApprovalsPage />} />
-        <Route path="notifications" element={<div className="space-y-4"><h1 className="text-xl font-bold text-gray-900 dark:text-white">Notifications</h1><p className="text-sm text-gray-500">Send and manage notifications.</p></div>} />
+        <Route path="notifications" element={<AdminNotifications />} />
         <Route path="audit-logs" element={<AuditLogsPage />} />
         <Route path="users" element={<AdminEmployees />} />
         <Route path="settings" element={<SettingsPage />} />
@@ -106,7 +115,11 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <AppRoutes />
+          <AppDataProvider>
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
+          </AppDataProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

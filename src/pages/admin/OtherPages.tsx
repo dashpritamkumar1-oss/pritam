@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Clock, Edit, Trash2, Sun, Moon, Settings as SettingsIcon, Download, FileText, BarChart3, Calendar, Users, CheckSquare, AlertTriangle, Search } from 'lucide-react';
-import { shifts, holidays, attendanceCorrections, leaveRequests, auditLogs, departments } from '../../data/mockData';
+import { useAppData } from '../../contexts/AppDataContext';
+import { useToast } from '../../contexts/ToastContext';
+import { shifts, holidays, auditLogs, departments } from '../../data/mockData';
 
 // =================== SHIFTS PAGE ===================
 export function ShiftsPage() {
@@ -134,9 +136,11 @@ export function ReportsPage() {
 // =================== APPROVAL CENTER ===================
 export function ApprovalsPage() {
   const [activeTab, setActiveTab] = useState<'leave' | 'corrections' | 'requests'>('leave');
+  const { leaveRequests, corrections, approveLeave, rejectLeave, approveCorrection, rejectCorrection } = useAppData();
+  const toast = useToast();
   
-  const pendingLeaves = leaveRequests.filter(l => l.status === 'pending');
-  const pendingCorrections = attendanceCorrections.filter(c => c.status === 'pending');
+  const pendingLeaves = leaveRequests.filter((l: any) => l.status === 'pending');
+  const pendingCorrections = corrections.filter((c: any) => c.status === 'pending');
 
   return (
     <div className="space-y-6">
@@ -182,8 +186,8 @@ export function ApprovalsPage() {
                   <td className="px-4 py-3 text-sm text-gray-500 max-w-[200px] truncate">{lr.reason}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="px-3 py-1.5 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Approve</button>
-                      <button className="px-3 py-1.5 bg-red-500 text-white rounded-md text-xs font-medium hover:bg-red-600">Reject</button>
+                      <button onClick={() => { approveLeave(lr.id); toast.success('Approved', `${lr.employeeName}'s leave approved.`); }} className="px-3 py-1.5 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Approve</button>
+                      <button onClick={() => { rejectLeave(lr.id); toast.warning('Rejected', `${lr.employeeName}'s leave rejected.`); }} className="px-3 py-1.5 bg-red-500 text-white rounded-md text-xs font-medium hover:bg-red-600">Reject</button>
                     </div>
                   </td>
                 </tr>
@@ -219,8 +223,8 @@ export function ApprovalsPage() {
                   <td className="px-4 py-3 text-sm text-gray-500 max-w-[200px] truncate">{corr.reason}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="px-3 py-1.5 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Approve</button>
-                      <button className="px-3 py-1.5 bg-red-500 text-white rounded-md text-xs font-medium hover:bg-red-600">Reject</button>
+                      <button onClick={() => { approveCorrection(corr.id); toast.success('Correction Approved', `${corr.employeeName}'s correction approved.`); }} className="px-3 py-1.5 bg-green-500 text-white rounded-md text-xs font-medium hover:bg-green-600">Approve</button>
+                      <button onClick={() => { rejectCorrection(corr.id); toast.warning('Correction Rejected', `${corr.employeeName}'s correction rejected.`); }} className="px-3 py-1.5 bg-red-500 text-white rounded-md text-xs font-medium hover:bg-red-600">Reject</button>
                     </div>
                   </td>
                 </tr>

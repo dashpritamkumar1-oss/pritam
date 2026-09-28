@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { Search, CheckCircle, XCircle, Clock, Calendar, Filter, ChevronRight, Eye } from 'lucide-react';
-import { leaveRequests, departments } from '../../data/mockData';
+import { useAppData } from '../../contexts/AppDataContext';
+import { useToast } from '../../contexts/ToastContext';
+import { departments } from '../../data/mockData';
 
 export default function AdminLeave() {
+  const { leaveRequests, approveLeave, rejectLeave } = useAppData();
+  const toast = useToast();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -136,10 +140,10 @@ export default function AdminLeave() {
                     <td className="px-4 py-3 text-right">
                       {lr.status === 'pending' && (
                         <div className="flex items-center justify-end gap-1">
-                          <button className="px-2.5 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-medium hover:bg-green-200 dark:hover:bg-green-900/50">
+                          <button onClick={(e) => { e.stopPropagation(); approveLeave(lr.id); toast.success('Leave Approved', `${lr.employeeName}'s leave has been approved.`); }} className="px-2.5 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md text-xs font-medium hover:bg-green-200 dark:hover:bg-green-900/50">
                             Approve
                           </button>
-                          <button className="px-2.5 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-xs font-medium hover:bg-red-200 dark:hover:bg-red-900/50">
+                          <button onClick={(e) => { e.stopPropagation(); rejectLeave(lr.id); toast.warning('Leave Rejected', `${lr.employeeName}'s leave has been rejected.`); }} className="px-2.5 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md text-xs font-medium hover:bg-red-200 dark:hover:bg-red-900/50">
                             Reject
                           </button>
                         </div>
@@ -186,10 +190,10 @@ export default function AdminLeave() {
               </div>
               {selectedLeave.status === 'pending' && (
                 <div className="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                  <button className="w-full py-2.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600">
+                  <button onClick={() => { approveLeave(selectedLeave.id); toast.success('Approved', `${selectedLeave.employeeName}'s leave approved.`); setSelectedRequest(null); }} className="w-full py-2.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600">
                     ✓ Approve Leave
                   </button>
-                  <button className="w-full py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600">
+                  <button onClick={() => { rejectLeave(selectedLeave.id); toast.warning('Rejected', `${selectedLeave.employeeName}'s leave rejected.`); setSelectedRequest(null); }} className="w-full py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600">
                     ✕ Reject Leave
                   </button>
                 </div>

@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Bell, Check, Clock, Calendar, MapPin, AlertCircle, Megaphone } from 'lucide-react';
-import { notifications } from '../../data/mockData';
+import { useAppData } from '../../contexts/AppDataContext';
 
 export default function NotificationsPage() {
-  const [notifs, setNotifs] = useState(notifications);
-  const unreadCount = notifs.filter(n => !n.isRead).length;
-
-  const markAllRead = () => {
-    setNotifs(prev => prev.map(n => ({ ...n, isRead: true })));
-  };
+  const { notifications, markNotificationRead, markAllNotificationsRead } = useAppData();
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const markRead = (id: string) => {
-    setNotifs(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    markNotificationRead(id);
   };
 
   const getIcon = (type: string) => {
@@ -49,7 +45,7 @@ export default function NotificationsPage() {
         </div>
         {unreadCount > 0 && (
           <button
-            onClick={markAllRead}
+            onClick={markAllNotificationsRead}
             className="text-xs text-primary-500 font-medium px-3 py-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20"
           >
             Mark all read
@@ -58,7 +54,7 @@ export default function NotificationsPage() {
       </div>
 
       <div className="space-y-2">
-        {notifs.map(notif => (
+        {notifications.map(notif => (
           <button
             key={notif.id}
             onClick={() => markRead(notif.id)}
